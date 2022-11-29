@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "memory_management.h": "c",
-        "user.h": "c"
+        "user.h": "c",
+        "types.h": "c"
     }
 }

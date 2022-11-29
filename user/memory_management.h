@@ -1,8 +1,6 @@
+#include "kernel/types.h"
 #include "user/user.h"
 #define NULL 0
-
-//
-static Node* root = NULL;
 
 //Node structure for segmenting blocks
 typedef struct Node {
@@ -16,7 +14,11 @@ typedef struct Node {
     struct Node* next;
 } Node;
 
+//pointer to first free block
+static Node* root = NULL;
+
 //prototypes
+Node* findFNode(Node *sNode, int size);
+void *splitblock(Node *sBlock, int size);
 void* _malloc(int size);
 void _free(void *ptr);
-Node* findFNode(Node *sNode, int size);
