@@ -9,7 +9,7 @@ Node *findFNode(Node *sNode, int size){
         return NULL;
     }
     else if(size > sNode->size){
-        findFNode(sNode->next, size);
+        return findFNode(sNode->next, size);
     }
     else{
         return sNode;
@@ -24,9 +24,11 @@ int remNode(Node *rNode, Node *nNode){
             if(rNode->prev == NULL){
                 root = nNode;
                 nNode->prev = NULL;
+                nNode->next = NULL;
             }
             else{
                 rNode->prev->next = nNode;
+                nNode->next = NULL;
             }
         }
         else{
@@ -56,6 +58,7 @@ int remNode(Node *rNode, Node *nNode){
             if(rNode->prev == NULL){
                 root = rNode->next;
                 rNode->prev = NULL;
+                rNode->next->prev = NULL;
             }
             else{
                 rNode->next->prev=rNode->prev;
@@ -81,22 +84,28 @@ void *_malloc(int size){
         reqsize = newSize + sizeof(Node);
         repBlock = findFNode(root,newSize);
         if(repBlock != NULL){
-
+            //printf("\nrepNode add %p, repnode prev %p, rep node prev next %p, next prev %p\n",repBlock,repBlock->prev,repBlock->prev->next,repBlock->next->prev);
             if(repBlock->size <= reqsize){
                 remNode(repBlock,NULL);
+                //printf("here\n");
             }
             else{
-                newBlock = (Node *)((char *)repBlock + newSize);
+                newBlock = (Node *)((char*)repBlock + reqsize);
                 newBlock->size = repBlock->size - reqsize;
                 repBlock->size = newSize;
                 remNode(repBlock,newBlock);
+                //printf("split node prev %p, next %p\n",newBlock->prev,newBlock->next);
             }
+            //printf("repNode add %p, rep node prev next %p, next prev %p\n\n",repBlock,repBlock->prev->next,repBlock->next->prev);
+            repBlock->next = NULL;
+            repBlock->prev = NULL;
 
             address = (char *)repBlock + sizeof(Node);
             return address;
         }
         else{
         newBlock = (Node *) sbrk(reqsize);
+        newBlock->size = newSize;
         address = (char *)newBlock + sizeof(Node);
         return address;
         }
@@ -105,10 +114,12 @@ void *_malloc(int size){
 
 void _free(void *ptr){
     if(ptr != NULL){
-        Node *block = (Node *)((char *)ptr - sizeof(Node));
+        Node *block = ptr - sizeof(Node);
+        //printf("freeblock address %p\n",block);
         if (root!=NULL){
             root->prev = block;
             block->next = root;
+            block->prev = NULL;
             root = block;
         }
         else{
